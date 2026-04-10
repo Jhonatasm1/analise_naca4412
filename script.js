@@ -365,6 +365,173 @@ function renderAirfoilChart(geometry) {
   });
 }
 
+function requestElementFullscreen(element) {
+  if (element.requestFullscreen) {
+    return element.requestFullscreen();
+  }
+  if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+    return Promise.resolve();
+  }
+  if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+    return Promise.resolve();
+  }
+  return Promise.reject(new Error("Fullscreen API indisponivel."));
+}
+
+function exitAnyFullscreen() {
+  if (document.exitFullscreen) {
+    return document.exitFullscreen();
+  }
+  if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+    return Promise.resolve();
+  }
+  if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+    return Promise.resolve();
+  }
+  return Promise.resolve();
+}
+
+/**
+ * Permite abrir o print CAD em tela cheia ao clicar na imagem.
+ */
+function setupCadImageFullscreen() {
+  const cadImage = document.querySelector('img[src$="print-cad.png"]');
+  if (!cadImage) {
+    return;
+  }
+
+  cadImage.style.cursor = "zoom-in";
+  cadImage.title = "Clique para abrir em tela cheia";
+
+  const isCadImageInFullscreen = () => {
+    return (
+      document.fullscreenElement === cadImage ||
+      document.webkitFullscreenElement === cadImage ||
+      document.msFullscreenElement === cadImage
+    );
+  };
+
+  const refreshCursorState = () => {
+    cadImage.style.cursor = isCadImageInFullscreen() ? "zoom-out" : "zoom-in";
+  };
+
+  cadImage.addEventListener("click", async () => {
+    try {
+      if (isCadImageInFullscreen()) {
+        await exitAnyFullscreen();
+        return;
+      }
+
+      const hasFullscreenSupport =
+        cadImage.requestFullscreen || cadImage.webkitRequestFullscreen || cadImage.msRequestFullscreen;
+
+      if (!hasFullscreenSupport) {
+        window.open(cadImage.src, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      await requestElementFullscreen(cadImage);
+    } catch (error) {
+      console.error("Nao foi possivel abrir a imagem CAD em tela cheia:", error);
+    }
+  });
+
+  document.addEventListener("fullscreenchange", refreshCursorState);
+  document.addEventListener("webkitfullscreenchange", refreshCursorState);
+  document.addEventListener("MSFullscreenChange", refreshCursorState);
+}
+
+/**
+ * Permite abrir o grafico do perfil em tela cheia ao clicar no canvas.
+ */
+function setupAirfoilChartFullscreen() {
+  const chartCanvas = document.getElementById("airfoilChart");
+  const chartContainer = document.getElementById("airfoilChartContainer");
+  if (!chartCanvas || !chartContainer) {
+    return;
+  }
+
+  let resizeTimeoutId = null;
+
+  const scheduleChartResize = () => {
+    if (!airfoilChart) {
+      return;
+    }
+
+    if (resizeTimeoutId) {
+      clearTimeout(resizeTimeoutId);
+    }
+
+    requestAnimationFrame(() => {
+      if (airfoilChart) {
+        airfoilChart.resize();
+      }
+    });
+
+    resizeTimeoutId = setTimeout(() => {
+      if (airfoilChart) {
+        airfoilChart.resize();
+      }
+    }, 180);
+  };
+
+  chartCanvas.style.cursor = "zoom-in";
+  chartCanvas.title = "Clique para abrir o grafico em tela cheia";
+
+  const isChartInFullscreen = () => {
+    return (
+      document.fullscreenElement === chartContainer ||
+      document.webkitFullscreenElement === chartContainer ||
+      document.msFullscreenElement === chartContainer
+    );
+  };
+
+  const syncChartFullscreenState = () => {
+    const inFullscreen = isChartInFullscreen();
+    chartCanvas.style.cursor = inFullscreen ? "zoom-out" : "zoom-in";
+
+    // Garante retorno limpo ao layout original depois de sair do modo tela cheia.
+    if (!inFullscreen) {
+      chartContainer.style.width = "";
+      chartContainer.style.height = "";
+      chartCanvas.style.width = "";
+      chartCanvas.style.height = "";
+    }
+
+    scheduleChartResize();
+  };
+
+  chartCanvas.addEventListener("click", async () => {
+    try {
+      if (isChartInFullscreen()) {
+        await exitAnyFullscreen();
+        return;
+      }
+
+      const hasFullscreenSupport =
+        chartContainer.requestFullscreen || chartContainer.webkitRequestFullscreen || chartContainer.msRequestFullscreen;
+
+      if (!hasFullscreenSupport) {
+        return;
+      }
+
+      await requestElementFullscreen(chartContainer);
+      scheduleChartResize();
+    } catch (error) {
+      console.error("Nao foi possivel abrir o grafico em tela cheia:", error);
+    }
+  });
+
+  document.addEventListener("fullscreenchange", syncChartFullscreenState);
+  document.addEventListener("webkitfullscreenchange", syncChartFullscreenState);
+  document.addEventListener("MSFullscreenChange", syncChartFullscreenState);
+  window.addEventListener("resize", scheduleChartResize);
+}
+
 function runAnalysis() {
   const result = analyzeNACA4412(100, 1);
   renderResults(result);
@@ -377,6 +544,8 @@ function runAnalysis() {
 
 document.addEventListener("DOMContentLoaded", () => {
   runAnalysis();
+  setupCadImageFullscreen();
+  setupAirfoilChartFullscreen();
 
   const button = document.getElementById("recalculateBtn");
   if (button) {

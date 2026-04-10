@@ -36,3 +36,56 @@ body {
   color: var(--accent);
   font-family: "Consolas", "Courier New", monospace;
 }
+
+#airfoilChart {
+  display: block;
+  max-width: 100%;
+}
+
+img[src$="print-cad.png"]:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0.75rem;
+  object-fit: contain;
+  background: #020617;
+}
+
+img[src$="print-cad.png"]:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0.75rem;
+  object-fit: contain;
+  background: #020617;
+}
+
+#airfoilChartContainer:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0;
+  padding: 1rem;
+  border: none;
+  border-radius: 0;
+  background: #020617;
+}
+
+#airfoilChartContainer:fullscreen #airfoilChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#airfoilChartContainer:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0;
+  padding: 1rem;
+  border: none;
+  border-radius: 0;
+  background: #020617;
+}
+
+#airfoilChartContainer:-webkit-full-screen #airfoilChart {
+  width: 100% !important;
+  height: 100% !important;
+}

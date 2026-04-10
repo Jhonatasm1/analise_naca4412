@@ -52,16 +52,16 @@
 
         <div class="mt-6 grid gap-3 md:grid-cols-3">
           <div class="rounded-xl border border-cyan-400/30 bg-tech-800/80 p-4">
-            <p class="text-xs uppercase tracking-[0.18em] text-cyan-200/90">Aluno</p>
-            <p class="mt-1 text-base font-semibold text-slate-100">Seu Nome</p>
+            <p class="text-xs uppercase tracking-[0.18em] text-cyan-200/90">Aluno 1</p>
+            <p class="mt-1 text-base font-semibold text-slate-100">Gustavo Carvalho Fornazier Santana</p>
           </div>
           <div class="rounded-xl border border-cyan-400/30 bg-tech-800/80 p-4">
-            <p class="text-xs uppercase tracking-[0.18em] text-cyan-200/90">Dupla</p>
-            <p class="mt-1 text-base font-semibold text-slate-100">Nome da Dupla</p>
+            <p class="text-xs uppercase tracking-[0.18em] text-cyan-200/90">Aluno 2</p>
+            <p class="mt-1 text-base font-semibold text-slate-100">Jhonata da Silva Machado</p>
           </div>
           <div class="rounded-xl border border-amber-400/30 bg-tech-800/80 p-4">
-            <p class="text-xs uppercase tracking-[0.18em] text-amber-200/90">Perfil Analisado</p>
-            <p class="mt-1 text-base font-semibold text-slate-100">NACA 4412 (m=0.04, p=0.40, t=0.12)</p>
+            <p class="text-xs uppercase tracking-[0.18em] text-amber-200/90">Professor</p>
+            <p class="mt-1 text-base font-semibold text-slate-100">Helio de Assis Pegado</p>
           </div>
         </div>
       </header>
@@ -82,12 +82,12 @@
           </article>
 
           <article class="rounded-2xl border border-amber-300/45 bg-tech-800/80 p-5 shadow-md shadow-amber-500/10">
-            <p class="text-sm uppercase tracking-[0.14em] text-amber-200">Ixx no Centroide</p>
+            <p class="text-sm uppercase tracking-[0.14em] text-amber-200">I<sub>xx</sub> no Centroide</p>
             <p data-metric="ixx" class="mt-3 font-mono text-lg font-semibold text-amber-300">-</p>
           </article>
 
           <article class="rounded-2xl border border-cyan-300/40 bg-tech-800/80 p-5 shadow-md shadow-cyan-500/10">
-            <p class="text-sm uppercase tracking-[0.14em] text-cyan-200">Iyy no Centroide</p>
+            <p class="text-sm uppercase tracking-[0.14em] text-cyan-200">I<sub>yy</sub> no Centroide</p>
             <p data-metric="iyy" class="mt-3 font-mono text-lg font-semibold text-cyan-300">-</p>
           </article>
         </div>
@@ -99,7 +99,7 @@
           <p class="mt-2 text-sm text-slate-300">
             O canvas abaixo sera utilizado com Chart.js para visualizacao das coordenadas discretizadas do NACA 4412.
           </p>
-          <div class="mt-5 h-[360px] rounded-2xl border border-slate-700/80 bg-tech-950/80 p-3">
+          <div id="airfoilChartContainer" class="mt-5 h-[360px] overflow-hidden rounded-2xl border border-slate-700/80 bg-tech-950/80 p-3">
             <canvas id="airfoilChart" aria-label="Grafico do perfil NACA 4412" role="img"></canvas>
           </div>
         </article>
@@ -110,9 +110,9 @@
             <div class="result-row"><dt>Area</dt><dd id="areaValue">-</dd></div>
             <div class="result-row"><dt>Centroide X</dt><dd id="cxValue">-</dd></div>
             <div class="result-row"><dt>Centroide Y</dt><dd id="cyValue">-</dd></div>
-            <div class="result-row"><dt>Ixx (centroide)</dt><dd id="ixxValue">-</dd></div>
-            <div class="result-row"><dt>Iyy (centroide)</dt><dd id="iyyValue">-</dd></div>
-            <div class="result-row"><dt>Ixy (centroide)</dt><dd id="ixyValue">-</dd></div>
+            <div class="result-row"><dt>I<sub>xx</sub> (centroide)</dt><dd id="ixxValue">-</dd></div>
+            <div class="result-row"><dt>I<sub>yy</sub> (centroide)</dt><dd id="iyyValue">-</dd></div>
+            <div class="result-row"><dt>I<sub>xy</sub> (centroide)</dt><dd id="ixyValue">-</dd></div>
           </dl>
 
           <h3 class="mt-6 text-lg font-semibold text-slate-100">Amostra de Coordenadas</h3>
@@ -189,35 +189,66 @@
       <section class="mt-8 rounded-3xl border border-cyan-300/30 bg-tech-900/70 p-6 shadow-lg">
         <h2 class="text-2xl font-semibold text-slate-50">Comparacao Analitico vs CAD</h2>
 
-        <div class="mt-5 grid gap-6 lg:grid-cols-2">
+        <div class="mt-5 grid gap-6 lg:grid-cols-[0.9fr_1.35fr]">
           <article class="rounded-2xl border border-cyan-300/30 bg-tech-800/85 p-5">
             <h3 class="text-lg font-semibold text-cyan-100">Resultados Analiticos</h3>
             <ul class="mt-4 space-y-3 text-sm text-slate-200">
               <li class="flex justify-between gap-4"><span>Area</span><span data-metric="area" class="font-mono text-cyan-300">-</span></li>
               <li class="flex justify-between gap-4"><span>Centroide X</span><span data-metric="cx" class="font-mono text-cyan-300">-</span></li>
               <li class="flex justify-between gap-4"><span>Centroide Y</span><span data-metric="cy" class="font-mono text-cyan-300">-</span></li>
-              <li class="flex justify-between gap-4"><span>Ixx (centroide)</span><span data-metric="ixx" class="font-mono text-cyan-300">-</span></li>
-              <li class="flex justify-between gap-4"><span>Iyy (centroide)</span><span data-metric="iyy" class="font-mono text-cyan-300">-</span></li>
-              <li class="flex justify-between gap-4"><span>Ixy (centroide)</span><span data-metric="ixy" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>I<sub>xx</sub> (centroide)</span><span data-metric="ixx" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>I<sub>yy</sub> (centroide)</span><span data-metric="iyy" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>I<sub>xy</sub> (centroide)</span><span data-metric="ixy" class="font-mono text-cyan-300">-</span></li>
             </ul>
+
+            <div class="mt-6 overflow-hidden rounded-lg border border-cyan-300/30">
+              <table class="min-w-full divide-y divide-slate-700 text-sm">
+                <thead class="bg-slate-900/70 text-slate-200">
+                  <tr>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold">Propriedade</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-cyan-200">Analitico</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-amber-200">CAD</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700 bg-slate-950/60 text-slate-200">
+                  <tr>
+                    <td class="px-4 py-3">Area da Secao</td>
+                    <td class="px-4 py-3 font-mono text-cyan-300">0.0819</td>
+                    <td class="px-4 py-3 font-mono text-amber-300">0.0826</td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3">Centroide X</td>
+                    <td class="px-4 py-3 font-mono text-cyan-300">0.4174</td>
+                    <td class="px-4 py-3 font-mono text-amber-300">0.4195</td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3">Centroide Y</td>
+                    <td class="px-4 py-3 font-mono text-cyan-300">0.0312</td>
+                    <td class="px-4 py-3 font-mono text-amber-300">0.0311</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </article>
 
-          <article class="rounded-2xl border border-amber-300/35 bg-tech-800/85 p-5">
+          <article class="rounded-2xl border border-amber-300/70 bg-gradient-to-br from-amber-300/10 via-tech-800/90 to-tech-800/85 p-5 shadow-xl shadow-amber-500/20">
             <h3 class="text-lg font-semibold text-amber-100">Modelo CAD (SolidWorks / Nastran)</h3>
-            <img
-              src=""
-              alt="Insira aqui o print da comparacao CAD"
-              class="mt-4 h-56 w-full rounded-xl border border-dashed border-amber-300/55 bg-tech-950/70 object-contain"
-            />
-            <label for="comparisonConclusion" class="mt-4 block text-sm font-medium text-amber-100">Conclusao da Comparacao</label>
-            <textarea
-              id="comparisonConclusion"
-              rows="5"
-              placeholder="Descreva aqui as diferencas observadas entre os resultados analiticos e o CAD."
-              class="mt-2 w-full rounded-lg border border-amber-300/45 bg-tech-950/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300/50"
-            ></textarea>
+            <p class="mt-2 text-xs uppercase tracking-[0.2em] text-amber-200/90">Destaque CAD</p>
+            <div class="mt-3 rounded-xl border border-amber-300/45 bg-slate-950/70 p-2 shadow-lg shadow-amber-500/20">
+              <img src="print-cad.png" alt="Análise no SolidWorks" class="w-full rounded-lg shadow-md mb-4">
+            </div>
+            <p class="mt-4 text-sm text-amber-100/95">
+              Dados exportados do SolidWorks/Nastran para confronto direto com os resultados analíticos.
+            </p>
           </article>
         </div>
+
+        <article class="mt-6 rounded-2xl border border-amber-300/55 bg-tech-800/90 p-5 shadow-lg shadow-amber-500/15">
+          <h3 class="text-lg font-semibold text-amber-100">Conclusao da Comparacao</h3>
+          <p class="mt-3 leading-relaxed text-slate-100">
+            A convergência geométrica entre o método analítico (discretização via Teorema de Green) e o CAD foi excelente, com variações na terceira casa decimal para a posição do centroide. É fulcral pontuar uma particularidade técnica na modelagem: enquanto o algoritmo iterou as Fórmulas de Propriedades de Polígonos para extrair os Momentos de Inércia de Área puros da seção transversal 2D, o software CAD foi configurado para extrair as Propriedades de Massa de um sólido 3D com massa sobreposta de 1g. Essa diferença de dimensão explica a escala distinta nos tensores de inércia, mas a precisão impecável da área (0.0826 no volume extrudado do CAD) e dos centros de massa (0.419, 0.031) valida integralmente o modelo matemático desenvolvido.
+          </p>
+        </article>
       </section>
     </main>
 
