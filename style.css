@@ -1,0 +1,38 @@
+:root {
+  --bg-a: #062739;
+  --bg-b: #011018;
+  --accent: #22d3ee;
+  --accent-soft: rgba(34, 211, 238, 0.22);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Trebuchet MS", "Gill Sans", sans-serif;
+  background:
+    radial-gradient(90rem 42rem at 18% -12%, rgba(34, 211, 238, 0.18), transparent 45%),
+    radial-gradient(80rem 42rem at 100% 0%, rgba(245, 158, 11, 0.12), transparent 40%),
+    linear-gradient(150deg, var(--bg-a), var(--bg-b));
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+  padding-bottom: 0.35rem;
+}
+
+.result-row dt {
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.result-row dd {
+  margin: 0;
+  color: var(--accent);
+  font-family: "Consolas", "Courier New", monospace;
+}

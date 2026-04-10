@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Relatorio Tecnico Interativo - NACA 4412</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["$", "$"], ["\\(", "\\)"]],
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+          processEscapes: true,
+        },
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              tech: {
+                950: "#020617",
+                900: "#0b1220",
+                800: "#172033",
+              },
+              accentBlue: "#38bdf8",
+              accentAmber: "#f59e0b",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="min-h-screen bg-tech-950 text-slate-100 antialiased">
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div class="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl"></div>
+      <div class="absolute -right-20 top-1/4 h-[28rem] w-[28rem] rounded-full bg-amber-400/15 blur-3xl"></div>
+      <div class="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
+    </div>
+
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-12">
+      <header class="rounded-3xl border border-cyan-400/35 bg-tech-900/85 p-6 shadow-2xl shadow-cyan-500/10 backdrop-blur sm:p-8">
+        <p class="mb-3 text-xs uppercase tracking-[0.28em] text-cyan-300">Relatorio Tecnico Interativo</p>
+        <h1 class="text-2xl font-bold leading-tight text-slate-50 sm:text-4xl">Teoria das Estruturas Aplicadas aos Avioes I</h1>
+        <p class="mt-2 text-lg font-semibold text-amber-300 sm:text-xl">NACA 4412 - Centroide e Momentos de Inercia por Teorema de Green</p>
+
+        <div class="mt-6 grid gap-3 md:grid-cols-3">
+          <div class="rounded-xl border border-cyan-400/30 bg-tech-800/80 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-cyan-200/90">Aluno</p>
+            <p class="mt-1 text-base font-semibold text-slate-100">Seu Nome</p>
+          </div>
+          <div class="rounded-xl border border-cyan-400/30 bg-tech-800/80 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-cyan-200/90">Dupla</p>
+            <p class="mt-1 text-base font-semibold text-slate-100">Nome da Dupla</p>
+          </div>
+          <div class="rounded-xl border border-amber-400/30 bg-tech-800/80 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-amber-200/90">Perfil Analisado</p>
+            <p class="mt-1 text-base font-semibold text-slate-100">NACA 4412 (m=0.04, p=0.40, t=0.12)</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="mt-8 rounded-3xl border border-cyan-400/25 bg-tech-900/70 p-6 shadow-lg">
+        <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-2xl font-semibold text-slate-50">Cards de Resultados</h2>
+          <button id="recalculateBtn" class="inline-flex items-center justify-center rounded-lg border border-cyan-300/50 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/20 focus:outline-none focus:ring-2 focus:ring-cyan-300/80">
+            Recalcular Propriedades
+          </button>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-3">
+          <article class="rounded-2xl border border-cyan-300/40 bg-tech-800/80 p-5 shadow-md shadow-cyan-500/10">
+            <p class="text-sm uppercase tracking-[0.14em] text-cyan-200">Centroide</p>
+            <p class="mt-2 text-sm text-slate-300">X = <span data-metric="cx" class="font-mono text-base font-semibold text-cyan-300">-</span></p>
+            <p class="mt-1 text-sm text-slate-300">Y = <span data-metric="cy" class="font-mono text-base font-semibold text-cyan-300">-</span></p>
+          </article>
+
+          <article class="rounded-2xl border border-amber-300/45 bg-tech-800/80 p-5 shadow-md shadow-amber-500/10">
+            <p class="text-sm uppercase tracking-[0.14em] text-amber-200">Ixx no Centroide</p>
+            <p data-metric="ixx" class="mt-3 font-mono text-lg font-semibold text-amber-300">-</p>
+          </article>
+
+          <article class="rounded-2xl border border-cyan-300/40 bg-tech-800/80 p-5 shadow-md shadow-cyan-500/10">
+            <p class="text-sm uppercase tracking-[0.14em] text-cyan-200">Iyy no Centroide</p>
+            <p data-metric="iyy" class="mt-3 font-mono text-lg font-semibold text-cyan-300">-</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mt-8 grid gap-6 xl:grid-cols-[2fr_1fr]">
+        <article class="rounded-3xl border border-cyan-300/25 bg-tech-900/70 p-6 shadow-lg">
+          <h2 class="text-2xl font-semibold text-slate-50">Grafico do Perfil Aerodinamico</h2>
+          <p class="mt-2 text-sm text-slate-300">
+            O canvas abaixo sera utilizado com Chart.js para visualizacao das coordenadas discretizadas do NACA 4412.
+          </p>
+          <div class="mt-5 h-[360px] rounded-2xl border border-slate-700/80 bg-tech-950/80 p-3">
+            <canvas id="airfoilChart" aria-label="Grafico do perfil NACA 4412" role="img"></canvas>
+          </div>
+        </article>
+
+        <aside class="rounded-3xl border border-amber-300/25 bg-tech-900/70 p-6 shadow-lg">
+          <h2 class="text-2xl font-semibold text-slate-50">Dados Analiticos</h2>
+          <dl class="mt-4 space-y-3 text-sm">
+            <div class="result-row"><dt>Area</dt><dd id="areaValue">-</dd></div>
+            <div class="result-row"><dt>Centroide X</dt><dd id="cxValue">-</dd></div>
+            <div class="result-row"><dt>Centroide Y</dt><dd id="cyValue">-</dd></div>
+            <div class="result-row"><dt>Ixx (centroide)</dt><dd id="ixxValue">-</dd></div>
+            <div class="result-row"><dt>Iyy (centroide)</dt><dd id="iyyValue">-</dd></div>
+            <div class="result-row"><dt>Ixy (centroide)</dt><dd id="ixyValue">-</dd></div>
+          </dl>
+
+          <h3 class="mt-6 text-lg font-semibold text-slate-100">Amostra de Coordenadas</h3>
+          <pre id="sampleCoordinates" class="mt-2 max-h-52 overflow-auto rounded-xl border border-slate-700/80 bg-tech-950/85 p-3 text-xs text-cyan-100">-</pre>
+        </aside>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-cyan-300/25 bg-tech-900/70 p-6 shadow-lg">
+        <h2 class="text-2xl font-semibold text-slate-50">Sobre o NACA 4412</h2>
+        <p class="mt-3 leading-relaxed text-slate-200">
+          Desenvolvida pelo National Advisory Committee for Aeronautics (NACA), a série de quatro dígitos revolucionou o design aerodinâmico ao definir perfis através de equações matemáticas. O NACA 4412 é um aerofólio assimétrico clássico, caracterizado por uma curvatura máxima de 4% localizada a 40% da corda, e uma espessura máxima de 12%. A escolha deste perfil para a nossa análise estrutural justifica-se exatamente por essa assimetria. Diferente dos perfis simétricos tradicionais (série 00XX), o camber do 4412 gera um produto de inércia não nulo e um deslocamento do centroide em ambos os eixos, exigindo uma formulação analítica mais robusta através do Teorema de Green e proporcionando um estudo mais aprofundado das propriedades da seção transversal.
+        </p>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-amber-300/30 bg-tech-900/70 p-6 shadow-lg">
+        <h2 class="text-2xl font-semibold text-slate-50">Motivacao do Projeto</h2>
+        <p class="mt-3 leading-relaxed text-slate-200">
+          A convergência entre a análise estrutural rigorosa e o desenvolvimento de software é uma realidade inegável na engenharia contemporânea. A criação desta interface web interativa nasceu do desejo de ir além da entrega de um cálculo estático. Através das vivências no meu estágio na HRD, percebo diariamente como a programação, a automação e a visualização clara de dados são diferenciais cruciais na resolução de problemas aeronáuticos e estruturais. Este projeto busca unir os rígidos fundamentos teóricos da Teoria das Estruturas lecionada na UFMG com as melhores práticas de desenvolvimento web moderno, demonstrando que o domínio dessas ferramentas eleva substancialmente a precisão e a qualidade da entrega na engenharia aeroespacial.
+        </p>
+      </section>
+
+      <section class="mt-8 rounded-3xl border border-cyan-300/30 bg-tech-900/70 p-6 shadow-lg">
+        <h2 class="text-2xl font-semibold text-slate-50">Metodologia de Cálculo Analítico</h2>
+        <p class="mt-3 leading-relaxed text-slate-200">
+          A modelagem combina a geração paramétrica da geometria NACA 4412 com discretização por espaçamento em cosseno e integração numérica sobre polígono fechado via Teorema de Green. A partir dessa formulação, são obtidos área, centroide e momentos de inércia da seção, com posterior comparação entre os resultados analíticos e os valores extraídos do ambiente CAD.
+        </p>
+      </section>
+
+      <div class="card p-6 rounded-lg shadow-lg mb-10 bg-gray-800 mt-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Equações Governantes do Modelo</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 class="text-lg font-semibold text-blue-400 mb-3">1. Geometria NACA (4 Dígitos)</h3>
+            <p class="text-gray-300 text-sm mb-2">Distribuição de meia-espessura adimensional (\(y_t/c\)):</p>
+            <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto text-sm text-gray-200">
+              $$\frac{y_t}{c} = 5t \left[ 0.2969\sqrt{\frac{x}{c}} - 0.1260\left(\frac{x}{c}\right) - 0.3516\left(\frac{x}{c}\right)^2 + 0.2843\left(\frac{x}{c}\right)^3 - 0.1036\left(\frac{x}{c}\right)^4 \right]$$
+            </div>
+
+            <p class="text-gray-300 text-sm mb-2">Linha de curvatura média adimensional (\(y_c/c\)) para \(0 \leq x/c \leq p\):</p>
+            <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto text-sm text-gray-200">
+              $$\frac{y_c}{c} = \frac{m}{p^2} \left(2p\frac{x}{c} - \left(\frac{x}{c}\right)^2\right)$$
+              $$\frac{y_c}{c} = \frac{m}{(1-p)^2} \left((1-2p) + 2p\frac{x}{c} - \left(\frac{x}{c}\right)^2\right), \quad p \leq \frac{x}{c} \leq 1$$
+            </div>
+
+            <p class="text-gray-300 text-sm mb-2">Coordenadas finais adimensionais (Extradorso e Intradorso):</p>
+            <div class="bg-gray-900 p-3 rounded overflow-x-auto text-sm text-gray-200">
+              $$\frac{X_U}{c} = \frac{x}{c} - \frac{y_t}{c} \sin(\theta) \quad ; \quad \frac{Y_U}{c} = \frac{y_c}{c} + \frac{y_t}{c} \cos(\theta)$$
+              $$\frac{X_L}{c} = \frac{x}{c} + \frac{y_t}{c} \sin(\theta) \quad ; \quad \frac{Y_L}{c} = \frac{y_c}{c} - \frac{y_t}{c} \cos(\theta)$$
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold text-yellow-400 mb-3">2. Fórmulas de Polígonos (Teorema de Green)</h3>
+            <p class="text-gray-300 text-sm mb-2">Área adimensional da Seção (\(A/c^2\)):</p>
+            <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto text-sm text-gray-200">
+              $$\frac{A}{c^2} = \frac{1}{2} \sum_{i=0}^{n-1} \left[\left(\frac{x_i}{c}\right)\left(\frac{y_{i+1}}{c}\right) - \left(\frac{x_{i+1}}{c}\right)\left(\frac{y_i}{c}\right)\right]$$
+            </div>
+
+            <p class="text-gray-300 text-sm mb-2">Coordenadas adimensionais do Centroide (\(\bar{x}/c\), \(\bar{y}/c\)):</p>
+            <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto text-sm text-gray-200">
+              $$\frac{\bar{x}}{c} = \frac{1}{6\left(A/c^2\right)} \sum_{i=0}^{n-1} \left(\frac{x_i}{c} + \frac{x_{i+1}}{c}\right) \left[\left(\frac{x_i}{c}\right)\left(\frac{y_{i+1}}{c}\right) - \left(\frac{x_{i+1}}{c}\right)\left(\frac{y_i}{c}\right)\right]$$
+              $$\frac{\bar{y}}{c} = \frac{1}{6\left(A/c^2\right)} \sum_{i=0}^{n-1} \left(\frac{y_i}{c} + \frac{y_{i+1}}{c}\right) \left[\left(\frac{x_i}{c}\right)\left(\frac{y_{i+1}}{c}\right) - \left(\frac{x_{i+1}}{c}\right)\left(\frac{y_i}{c}\right)\right]$$
+            </div>
+
+            <p class="text-gray-300 text-sm mb-2">Momento de Inércia adimensional (\(I_{xx}/c^4\)):</p>
+            <div class="bg-gray-900 p-3 rounded overflow-x-auto text-sm text-gray-200">
+              $$\frac{I_{xx}}{c^4} = \frac{1}{12} \sum_{i=0}^{n-1} \left[\left(\frac{y_i}{c}\right)^2 + \left(\frac{y_i}{c}\right)\left(\frac{y_{i+1}}{c}\right) + \left(\frac{y_{i+1}}{c}\right)^2\right] \left[\left(\frac{x_i}{c}\right)\left(\frac{y_{i+1}}{c}\right) - \left(\frac{x_{i+1}}{c}\right)\left(\frac{y_i}{c}\right)\right]$$
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="mt-8 rounded-3xl border border-cyan-300/30 bg-tech-900/70 p-6 shadow-lg">
+        <h2 class="text-2xl font-semibold text-slate-50">Comparacao Analitico vs CAD</h2>
+
+        <div class="mt-5 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-2xl border border-cyan-300/30 bg-tech-800/85 p-5">
+            <h3 class="text-lg font-semibold text-cyan-100">Resultados Analiticos</h3>
+            <ul class="mt-4 space-y-3 text-sm text-slate-200">
+              <li class="flex justify-between gap-4"><span>Area</span><span data-metric="area" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>Centroide X</span><span data-metric="cx" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>Centroide Y</span><span data-metric="cy" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>Ixx (centroide)</span><span data-metric="ixx" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>Iyy (centroide)</span><span data-metric="iyy" class="font-mono text-cyan-300">-</span></li>
+              <li class="flex justify-between gap-4"><span>Ixy (centroide)</span><span data-metric="ixy" class="font-mono text-cyan-300">-</span></li>
+            </ul>
+          </article>
+
+          <article class="rounded-2xl border border-amber-300/35 bg-tech-800/85 p-5">
+            <h3 class="text-lg font-semibold text-amber-100">Modelo CAD (SolidWorks / Nastran)</h3>
+            <img
+              src=""
+              alt="Insira aqui o print da comparacao CAD"
+              class="mt-4 h-56 w-full rounded-xl border border-dashed border-amber-300/55 bg-tech-950/70 object-contain"
+            />
+            <label for="comparisonConclusion" class="mt-4 block text-sm font-medium text-amber-100">Conclusao da Comparacao</label>
+            <textarea
+              id="comparisonConclusion"
+              rows="5"
+              placeholder="Descreva aqui as diferencas observadas entre os resultados analiticos e o CAD."
+              class="mt-2 w-full rounded-lg border border-amber-300/45 bg-tech-950/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300/50"
+            ></textarea>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
