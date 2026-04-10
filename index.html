@@ -137,7 +137,13 @@
       <section class="mt-8 rounded-3xl border border-cyan-300/30 bg-tech-900/70 p-6 shadow-lg">
         <h2 class="text-2xl font-semibold text-slate-50">Metodologia de Cálculo Analítico</h2>
         <p class="mt-3 leading-relaxed text-slate-200">
-          A modelagem combina a geração paramétrica da geometria NACA 4412 com discretização por espaçamento em cosseno e integração numérica sobre polígono fechado via Teorema de Green. A partir dessa formulação, são obtidos área, centroide e momentos de inércia da seção, com posterior comparação entre os resultados analíticos e os valores extraídos do ambiente CAD. É fulcral salientar que optou-se por utilizar linguagem JavaScript para o cálculo dos momentos e centróide, ao passo que as equações podem ser vistas a seguir.
+          No escopo do projeto, a rotina analítica foi inicialmente estruturada em MATLAB e, posteriormente, reproduzida em JavaScript para integração direta com esta interface web interativa. A formulação combina a geração paramétrica da geometria NACA 4412 com integração numérica via Teorema de Green em polígono fechado.
+        </p>
+        <p class="mt-3 leading-relaxed text-slate-200">
+          A discretização foi implementada com espaçamento em cosseno e 100 pontos por superfície (extradorso e intradorso), garantindo refinamento adequado nas regiões de maior curvatura e convergência dos parâmetros geométricos (área, centróide e momentos de inércia) para comparação com o modelo CAD.
+        </p>
+        <p class="mt-3 text-sm text-cyan-200/95">
+          Painel web publicado: <a href="https://jhonatasm1.github.io/analise_naca4412" target="_blank" rel="noopener noreferrer" class="font-semibold underline decoration-cyan-300/80 underline-offset-4 hover:text-cyan-100">jhonatasm1.github.io/analise_naca4412</a>
         </p>
       </section>
 
@@ -186,6 +192,35 @@
         </div>
       </div>
 
+      <section class="mt-8 rounded-3xl border border-amber-300/35 bg-tech-900/70 p-6 shadow-lg">
+        <h2 class="text-2xl font-semibold text-slate-50">Metodo Computacional (Resumo)</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-3">
+          <article class="rounded-2xl border border-amber-300/30 bg-tech-800/80 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-amber-200/90">Etapa 1</p>
+            <h3 class="mt-1 text-base font-semibold text-slate-100">Obtencao dos Dados do Perfil</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-200">
+              As coordenadas do NACA 4412 foram extraidas em formato Selig, organizadas em planilha e preparadas para importacao no ambiente CAD.
+            </p>
+          </article>
+
+          <article class="rounded-2xl border border-amber-300/30 bg-tech-800/80 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-amber-200/90">Etapa 2</p>
+            <h3 class="mt-1 text-base font-semibold text-slate-100">Importacao e Fechamento da Geometria</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-200">
+              A curva foi importada no SolidWorks como pontos XYZ e o bordo de fuga foi fechado com ajuste minimo para garantir continuidade geometrica.
+            </p>
+          </article>
+
+          <article class="rounded-2xl border border-amber-300/30 bg-tech-800/80 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-amber-200/90">Etapa 3</p>
+            <h3 class="mt-1 text-base font-semibold text-slate-100">Extracao das Propriedades</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-200">
+              Com a extrusao da secao, foram extraidos centro de massa e propriedades de inercia para confronto com os resultados analiticos da rotina.
+            </p>
+          </article>
+        </div>
+      </section>
+
       <section class="mt-8 rounded-3xl border border-cyan-300/30 bg-tech-900/70 p-6 shadow-lg">
         <h2 class="text-2xl font-semibold text-slate-50">Comparacao Analitico vs CAD</h2>
 
@@ -208,6 +243,7 @@
                     <th scope="col" class="px-4 py-3 text-left font-semibold">Propriedade</th>
                     <th scope="col" class="px-4 py-3 text-left font-semibold text-cyan-200">Analitico</th>
                     <th scope="col" class="px-4 py-3 text-left font-semibold text-amber-200">CAD</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-300">Desvio Relativo</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-700 bg-slate-950/60 text-slate-200">
@@ -215,16 +251,19 @@
                     <td class="px-4 py-3">Area da Secao</td>
                     <td class="px-4 py-3 font-mono text-cyan-300">0.0819</td>
                     <td class="px-4 py-3 font-mono text-amber-300">0.0826</td>
+                    <td class="px-4 py-3 font-mono text-slate-100">0.85%</td>
                   </tr>
                   <tr>
                     <td class="px-4 py-3">Centroide X</td>
                     <td class="px-4 py-3 font-mono text-cyan-300">0.4174</td>
                     <td class="px-4 py-3 font-mono text-amber-300">0.4195</td>
+                    <td class="px-4 py-3 font-mono text-slate-100">0.50%</td>
                   </tr>
                   <tr>
                     <td class="px-4 py-3">Centroide Y</td>
                     <td class="px-4 py-3 font-mono text-cyan-300">0.0312</td>
                     <td class="px-4 py-3 font-mono text-amber-300">0.0311</td>
+                    <td class="px-4 py-3 font-mono text-slate-100">0.32%</td>
                   </tr>
                 </tbody>
               </table>
