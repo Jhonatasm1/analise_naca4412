@@ -399,7 +399,7 @@ function exitAnyFullscreen() {
  * Permite abrir o print CAD em tela cheia ao clicar na imagem.
  */
 function setupCadImageFullscreen() {
-  const cadImage = document.querySelector('img[src$="print-cad.png"]');
+  const cadImage = document.querySelector('img[src*="print_cad"]');
   if (!cadImage) {
     return;
   }
