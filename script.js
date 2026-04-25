@@ -549,51 +549,33 @@ function exitAnyFullscreen() {
 /**
  * Permite abrir o print CAD em tela cheia ao clicar na imagem.
  */
-function setupCadImageFullscreen() {
-  const cadImage = document.querySelector('img[src*="print_cad"]');
-  if (!cadImage) {
-    return;
-  }
+function setupZoomableImages() {
+  const images = document.querySelectorAll('.zoomable-img, img[src*="print_cad"]');
 
-  cadImage.style.cursor = "zoom-in";
-  cadImage.title = "Clique para abrir em tela cheia";
+  images.forEach((img) => {
+    img.style.cursor = "zoom-in";
+    img.title = "Clique para abrir em tela cheia";
 
-  const isCadImageInFullscreen = () => {
-    return (
-      document.fullscreenElement === cadImage ||
-      document.webkitFullscreenElement === cadImage ||
-      document.msFullscreenElement === cadImage
-    );
-  };
+    const isInFullscreen = () => {
+      return (
+        document.fullscreenElement === img ||
+        document.webkitFullscreenElement === img ||
+        document.msFullscreenElement === img
+      );
+    };
 
-  const refreshCursorState = () => {
-    cadImage.style.cursor = isCadImageInFullscreen() ? "zoom-out" : "zoom-in";
-  };
-
-  cadImage.addEventListener("click", async () => {
-    try {
-      if (isCadImageInFullscreen()) {
-        await exitAnyFullscreen();
-        return;
+    img.addEventListener("click", async () => {
+      try {
+        if (isInFullscreen()) {
+          await exitAnyFullscreen();
+          return;
+        }
+        await requestElementFullscreen(img);
+      } catch (error) {
+        console.error("Erro ao abrir imagem em tela cheia:", error);
       }
-
-      const hasFullscreenSupport =
-        cadImage.requestFullscreen || cadImage.webkitRequestFullscreen || cadImage.msRequestFullscreen;
-
-      if (!hasFullscreenSupport) {
-        window.open(cadImage.src, "_blank", "noopener,noreferrer");
-        return;
-      }
-
-      await requestElementFullscreen(cadImage);
-    } catch (error) {
-      console.error("Nao foi possivel abrir a imagem CAD em tela cheia:", error);
-    }
+    });
   });
-
-  document.addEventListener("fullscreenchange", refreshCursorState);
-  document.addEventListener("webkitfullscreenchange", refreshCursorState);
-  document.addEventListener("MSFullscreenChange", refreshCursorState);
 }
 
 /**
@@ -695,7 +677,7 @@ function runAnalysis() {
 
 document.addEventListener("DOMContentLoaded", () => {
   runAnalysis();
-  setupCadImageFullscreen();
+  setupZoomableImages();
   setupAirfoilChartFullscreen();
 
   const button = document.getElementById("recalculateBtn");
