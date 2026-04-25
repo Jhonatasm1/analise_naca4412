@@ -10,6 +10,10 @@ const NACA_4412 = Object.freeze({
   t: 0.12,
 });
 
+const SHEAR_CENTER_MODEL = Object.freeze({
+  thickness: 0.002,
+});
+
 let airfoilChart = null;
 
 /**
@@ -129,6 +133,131 @@ function ensureCounterClockwise(vertices) {
 }
 
 /**
+ * Gera o contorno fechado do NACA 4412 para integracao de parede fina.
+ */
+function generateNACA4412Contour(pointCount = 100, chord = 1, polygonOverride = null) {
+  const polygon = Array.isArray(polygonOverride)
+    ? polygonOverride
+    : generateNACA4412Coordinates(pointCount, chord).polygon;
+
+  return ensureCounterClockwise(polygon);
+}
+
+/**
+ * Discretiza o contorno em segmentos com ponto medio e elementos diferenciais.
+ */
+function buildSegments(vertices) {
+  const segments = [];
+
+  for (let i = 0; i < vertices.length; i += 1) {
+    const p0 = vertices[i];
+    const p1 = vertices[(i + 1) % vertices.length];
+    const dx = p1.x - p0.x;
+    const dy = p1.y - p0.y;
+    const ds = Math.hypot(dx, dy);
+
+    if (ds <= 1e-14) {
+      continue;
+    }
+
+    segments.push({
+      p0,
+      p1,
+      dx,
+      dy,
+      ds,
+      xMid: 0.5 * (p0.x + p1.x),
+      yMid: 0.5 * (p0.y + p1.y),
+    });
+  }
+
+  return segments;
+}
+
+/**
+ * Integra o fluxo basico q_b e calcula o fluxo de fechamento q_s0 para uma carga (Vx, Vy).
+ */
+function solveShearFlowForLoad(segments, properties, thickness, Vx, Vy) {
+  const { x: cx, y: cy } = properties.centroid;
+  const { ixx: Ixx, iyy: Iyy, ixy: Ixy } = properties.inertiaAtCentroid;
+
+  const D = Ixx * Iyy - Ixy ** 2;
+  if (Math.abs(D) < Number.EPSILON) {
+    throw new Error("Denominador D ~ 0 no calculo do fluxo de cisalhamento.");
+  }
+
+  const A = (Vy * Iyy - Vx * Ixy) / D;
+  const B = (Vx * Ixx - Vy * Ixy) / D;
+
+  let intY = 0;
+  let intX = 0;
+  const qb = [];
+
+  for (const seg of segments) {
+    const xTildeMid = seg.xMid - cx;
+    const yTildeMid = seg.yMid - cy;
+
+    const dIntY = yTildeMid * thickness * seg.ds;
+    const dIntX = xTildeMid * thickness * seg.ds;
+
+    const intYMid = intY + 0.5 * dIntY;
+    const intXMid = intX + 0.5 * dIntX;
+
+    const qBasic = -A * intYMid - B * intXMid;
+    qb.push(qBasic);
+
+    intY += dIntY;
+    intX += dIntX;
+  }
+
+  let numerator = 0;
+  let denominator = 0;
+  let perimeter = 0;
+  for (let i = 0; i < segments.length; i += 1) {
+    numerator += (qb[i] / thickness) * segments[i].ds;
+    denominator += (1 / thickness) * segments[i].ds;
+    perimeter += segments[i].ds;
+  }
+
+  const qS0 = -numerator / denominator;
+
+  let torqueZ = 0;
+  for (let i = 0; i < segments.length; i += 1) {
+    const seg = segments[i];
+    const qTotal = qb[i] + qS0;
+
+    // Produto vetorial r x ds na forma escalar 2D: x*dy - y*dx.
+    torqueZ += qTotal * (seg.xMid * seg.dy - seg.yMid * seg.dx);
+  }
+
+  return {
+    D,
+    A,
+    B,
+    qb,
+    qS0,
+    torqueZ,
+    perimeter,
+  };
+}
+
+/**
+ * Obtem (x_SC, y_SC) por equilibrio de momento torsor para cargas unitarias.
+ */
+function computeShearCenter(segments, properties, thickness) {
+  const unitVy = solveShearFlowForLoad(segments, properties, thickness, 0, 1);
+  const unitVx = solveShearFlowForLoad(segments, properties, thickness, 1, 0);
+
+  // T = x_SC*Vy - y_SC*Vx, tomando momento sobre a origem (bordo de ataque).
+  return {
+    x: unitVy.torqueZ,
+    y: -unitVx.torqueZ,
+    unitVy,
+    unitVx,
+  };
+}
+
+/**
  * Aplica o Teorema de Green em um poligono simples e fechado.
  * Retorna area, centroide e inercia em relacao ao centroide.
  */
@@ -196,11 +325,18 @@ function polygonSectionProperties(vertices) {
 function analyzeNACA4412(pointCount = 100, chord = 1) {
   const geometry = generateNACA4412Coordinates(pointCount, chord);
   const properties = polygonSectionProperties(geometry.polygon);
+  const contour = generateNACA4412Contour(pointCount, chord, geometry.polygon);
+  const segments = buildSegments(contour);
+  const shearCenterResult = computeShearCenter(segments, properties, SHEAR_CENTER_MODEL.thickness);
 
   return {
     input: { pointCount, chord },
     geometry,
     properties,
+    shearCenter: {
+      x: shearCenterResult.x,
+      y: shearCenterResult.y,
+    },
   };
 }
 
@@ -220,6 +356,8 @@ function setMetricValue(metricName, formattedValue) {
     ixx: "ixxValue",
     iyy: "iyyValue",
     ixy: "ixyValue",
+    xsc: "xscValue",
+    ysc: "yscValue",
   };
 
   const metricId = metricIdMap[metricName];
@@ -251,6 +389,8 @@ function renderResults(result) {
   setMetricValue("ixx", formatNumber(inertiaAtCentroid.ixx));
   setMetricValue("iyy", formatNumber(inertiaAtCentroid.iyy));
   setMetricValue("ixy", formatNumber(inertiaAtCentroid.ixy));
+  setMetricValue("xsc", formatNumber(result.shearCenter.x));
+  setMetricValue("ysc", formatNumber(result.shearCenter.y));
 
   const upperPreview = getCoordinatePreview(result.geometry.upper).join("\n");
   const lowerPreview = getCoordinatePreview(result.geometry.lower).join("\n");
@@ -261,7 +401,7 @@ function renderResults(result) {
 /**
  * Renderiza o perfil aerodinamico no canvas usando Chart.js.
  */
-function renderAirfoilChart(geometry) {
+function renderAirfoilChart(geometry, shearCenter) {
   const canvas = document.getElementById("airfoilChart");
   if (!canvas || typeof Chart === "undefined") {
     return;
@@ -299,6 +439,17 @@ function renderAirfoilChart(geometry) {
           pointRadius: 0,
           borderWidth: 2,
           borderColor: "#f59e0b",
+        },
+        {
+          label: "Centro de Cisalhamento",
+          data: [{ x: shearCenter.x, y: shearCenter.y }],
+          showLine: false,
+          pointStyle: "crossRot",
+          pointRadius: 8,
+          pointBorderWidth: 3,
+          borderColor: "#ef4444",
+          pointBorderColor: "#ef4444",
+          pointBackgroundColor: "#ef4444",
         },
       ],
     },
@@ -535,7 +686,7 @@ function setupAirfoilChartFullscreen() {
 function runAnalysis() {
   const result = analyzeNACA4412(100, 1);
   renderResults(result);
-  renderAirfoilChart(result.geometry);
+  renderAirfoilChart(result.geometry, result.shearCenter);
 
   // Facilita comparacao com CAD: dados ficam acessiveis no console.
   window.naca4412Result = result;
